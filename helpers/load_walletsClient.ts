@@ -11,7 +11,6 @@ import {
   WalletClient,
   publicActions,
   PublicActions,
-  PublicClient,
 } from "viem";
 
 export const accounts: HDAccount[] = [];
@@ -57,25 +56,6 @@ export const getL2Wallets = () => {
 
 export const getWallets = () => {
   getAccounts();
-  // getL1Wallets();
-  // getL2Wallets();
+  getL1Wallets();
+  getL2Wallets();
 };
-
-const test = async () => {
-  let index = 0;
-  for (const account of accounts) {
-    console.log(index, account.address);
-    index++;
-  }
-  console.log(accounts.length);
-
-  // const [address] = await L1Wallets[0].getAddresses();
-  // console.log("L1Wallets[0] =>", address);
-};
-
-// export const getBalanceETH_L2 = async (L2Wallet: WalletClient) =>
-//   Number(await L2Wallet.getBalance()).toString();
-
-// export const getBalanceETH_L1 = async (L1Wallet: WalletClient) =>
-//   Number(await L1Wallet.getBalance());
-getWallets();

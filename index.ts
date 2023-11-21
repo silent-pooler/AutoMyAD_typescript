@@ -17,7 +17,7 @@ import {
   getL2Wallets,
 } from "./helpers/load_walletsClient";
 
-import { walletBalance_L2_token } from "./modules/tokenBalances_L2";
+import { walletBalance_L2_token } from "./modules/tokens_Balances_L2";
 
 import { SCROLL_MAINNET_CONTRACT } from "./constants/constants";
 
@@ -30,10 +30,14 @@ const main = async () => {
   getWallets();
 
   getL2Wallets();
-  walletBalance_L2_token(accounts[0], SCROLL_MAINNET_CONTRACT.USDC);
-  //   for (let i = 0; i < accounts.length; i++) {
-  //     walletBalance_L2_token(accounts[0], SCROLL_MAINNET_CONTRACT.USDC);
-  //   }
+
+  for (let i = 0; i < accounts.length; i++) {
+    walletBalance_L2_token(accounts[i], {
+      symbol: "USDT",
+      address: "0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df",
+      decimals: 8,
+    });
+  }
 };
 
 // We recommend this pattern to be able to use async/await everywhere
