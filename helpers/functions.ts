@@ -1,25 +1,27 @@
-export function shuffleWallets(array: []) {
+import { HDAccount } from "viem";
+
+export function shuffleWallets(array: HDAccount[]) {
   for (let i = array.length - 1; i > 0; i--) {
     let j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
 }
 
-export function randomizeAmount(
+export function randomizeAmount_2decimals(
   min_amount: number,
   max_amount: number
 ): string {
-  return (Math.random() * (max_amount - min_amount) + min_amount).toFixed(4);
+  return (Math.random() * (max_amount - min_amount) + min_amount).toFixed(2);
 }
 
-export function randomizeAmountETH(
+export function randomizeAmount_ETH(
   min_amount: number,
   max_amount: number
 ): string {
   return (Math.random() * (max_amount - min_amount) + min_amount).toFixed(18);
 }
 
-export function randomizeAmountUSDC(
+export function randomizeAmount_6decimals(
   min_amount: number,
   max_amount: number
 ): string {

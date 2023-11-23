@@ -5,17 +5,33 @@
 //     WITHDRAW_ERC20: 32e4,
 //   };
 
+import { Address } from "viem";
+
 export type Network = "mainnet" | "scroll";
 type Token = "USDT" | "USDC" | "WETH";
 
 export interface TokenDetails {
   symbol: string;
-  address: string;
+  address: Address;
   decimals: number;
 }
 
 export type NetworkContracts = {
   [key in Token]: TokenDetails;
+};
+
+export interface TransactionParameters {
+  min_delay: number;
+  max_delay: number;
+  min_amount: number;
+  max_amount: number;
+}
+
+export const TRANSACTION_PARAMETERS: TransactionParameters = {
+  min_delay: 1800, // in s = 30 mn
+  max_delay: 14400, // in s = 4 h
+  min_amount: 2,
+  max_amount: 10,
 };
 
 export const SCROLL_MAINNET_CONTRACT: NetworkContracts = {
@@ -53,3 +69,6 @@ export const MAINNET_CONTRACT: NetworkContracts = {
     decimals: 18,
   },
 };
+
+export const DEAD_ADDRESS: Address =
+  "0x0000000000000000000000000000000000000000";

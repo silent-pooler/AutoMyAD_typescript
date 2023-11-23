@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import { mnemonicToAccount, HDAccount } from "viem/accounts";
-import { scrollSepolia, sepolia, mainnet, scroll } from "viem/chains";
+import { mainnet, scroll } from "viem/chains";
 import {
   http,
   createWalletClient,
@@ -12,6 +12,8 @@ import {
   publicActions,
   PublicActions,
 } from "viem";
+
+import { shuffleWallets } from "./functions";
 
 export const accounts: HDAccount[] = [];
 
@@ -28,12 +30,14 @@ export const getAccounts = () => {
   }
 };
 
-interface WalletClientWithPublicActions extends WalletClient, PublicActions {}
+export interface WalletClientWithPublicActions
+  extends WalletClient,
+    PublicActions {}
 
 export const L1Wallets: WalletClientWithPublicActions[] = [];
 
 export const getL1Wallets = () => {
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 30; i++) {
     L1Wallets[i] = createWalletClient({
       account: accounts[i],
       chain: mainnet,
@@ -45,7 +49,7 @@ export const getL1Wallets = () => {
 export const L2Wallets: WalletClientWithPublicActions[] = [];
 
 export const getL2Wallets = () => {
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 30; i++) {
     L2Wallets[i] = createWalletClient({
       account: accounts[i],
       chain: scroll,
@@ -56,6 +60,13 @@ export const getL2Wallets = () => {
 
 export const getWallets = () => {
   getAccounts();
+  getL1Wallets();
+  getL2Wallets();
+};
+
+export const getShuffledWallets = () => {
+  getAccounts();
+  shuffleWallets(accounts);
   getL1Wallets();
   getL2Wallets();
 };
