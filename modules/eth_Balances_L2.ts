@@ -1,19 +1,19 @@
 import colors from "colors";
-import { formatEther } from "viem";
+import { Address, formatEther } from "viem";
 import { scroll } from "viem/chains";
-import { HDAccount } from "viem/accounts";
 
 import { createL2PublicClient } from "../helpers/load_publicClient";
-export const walletBalance_L2_ETH = async (wallet: HDAccount) => {
-  const L1PublicClient = createL2PublicClient(scroll);
+
+export const walletBalance_L2_ETH = async (address: Address) => {
+  const L2PublicClient = createL2PublicClient(scroll);
 
   try {
-    const balance = await L1PublicClient.getBalance({
-      address: wallet.address,
+    const balance = await L2PublicClient.getBalance({
+      address: address,
     });
 
-    console.log(wallet.address + " => ", Number(formatEther(balance)), "ETH");
+    return formatEther(balance);
   } catch (error) {
-    console.log(colors.red("getBalance wallet error=>"), error);
+    console.log(colors.red(`getBalance ${address} error => ${error}`));
   }
 };

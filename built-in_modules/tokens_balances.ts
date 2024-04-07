@@ -12,19 +12,19 @@ import {
 } from "../helpers/load_publicClient";
 
 import {
-  NetworkContracts,
+  SwapableNetworkContracts,
   SCROLL_MAINNET_CONTRACT,
   MAINNET_CONTRACT,
-  TokenDetails,
+  ContractDetails,
   Network,
 } from "../constants/constants";
 
 export const walletBalances_Token = async (
   network: Network,
-  tokenDetails: TokenDetails
+  ContractDetails: ContractDetails
 ): Promise<void> => {
-  const decimals = tokenDetails.decimals;
-  const symbol = tokenDetails.symbol;
+  const decimals = ContractDetails.decimals;
+  const symbol = ContractDetails.symbol;
 
   getAccounts();
 
@@ -40,7 +40,7 @@ export const walletBalances_Token = async (
   for (let i = 0; i < accounts.length; i++) {
     try {
       const balance = await publicClient.readContract({
-        address: getAddress(tokenDetails.address),
+        address: getAddress(ContractDetails.address),
         abi: ERC20ABI,
         functionName: "balanceOf",
         args: [accounts[i].address],
@@ -85,8 +85,8 @@ async function cli(): Promise<void> {
   }
   const network = args[0];
   const symbol = args[1];
-  let tokenList: NetworkContracts | undefined;
-  let tokenDetails: TokenDetails | undefined;
+  let tokenList: SwapableNetworkContracts | undefined;
+  let ContractDetails: ContractDetails | undefined;
 
   switch (network) {
     case "mainnet":
@@ -102,20 +102,20 @@ async function cli(): Promise<void> {
 
   switch (symbol) {
     case "USDT":
-      tokenDetails = tokenList.USDT;
+      ContractDetails = tokenList.USDT;
       break;
     case "USDC":
-      tokenDetails = tokenList.USDC;
+      ContractDetails = tokenList.USDC;
       break;
     case "WETH":
-      tokenDetails = tokenList.WETH;
+      ContractDetails = tokenList.WETH;
       break;
     default:
       console.log(colors.red("Invalid token research"));
       throw new Error("Invalid token");
   }
 
-  walletBalances_Token(network, tokenDetails);
+  walletBalances_Token(network, ContractDetails);
 }
 
 cli().catch((error) => {

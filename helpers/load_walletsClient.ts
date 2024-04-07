@@ -1,7 +1,7 @@
 import * as envEnc from "@chainlink/env-enc";
 envEnc.config();
-import * as dotenv from "dotenv";
-dotenv.config();
+// import * as dotenv from "dotenv";
+// dotenv.config();
 
 import { mnemonicToAccount, HDAccount } from "viem/accounts";
 import { mainnet, scroll } from "viem/chains";
