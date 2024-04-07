@@ -29,6 +29,7 @@ export const walletBalances_ETH = async (network: Network): Promise<void> => {
       });
 
       console.log(
+        i + 1,
         accounts[i].address + " => ",
         Number(formatEther(balance)),
         "ETH"

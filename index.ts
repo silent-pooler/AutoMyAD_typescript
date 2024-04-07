@@ -3,45 +3,57 @@ envEnc.config();
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { scrollSepolia, sepolia, mainnet, scroll } from "viem/chains";
-
-import {
-  createL1PublicClient,
-  createL2PublicClient,
-} from "./helpers/load_publicClient";
+import { TRANSACTION_PARAMETERS } from "./constants/constants";
+import { randomizeTime, randomizeIndex } from "./helpers/functions";
 
 import {
   accounts,
   L2Wallets,
-  getWallets,
-  getL2Wallets,
+  getShuffledWallets,
 } from "./helpers/load_walletsClient";
+
+import { swapAlgo } from "./modules/algo/swapAlgo";
+
+///
 
 import { walletBalance_L2_token } from "./modules/tokens_Balances_L2";
 
-import { SCROLL_MAINNET_CONTRACT } from "./constants/constants";
+///
 
-export const L1PublicClient = createL1PublicClient(mainnet);
-export const L2PublicClient = createL2PublicClient(scroll);
+// export const L1PublicClient = createL1PublicClient(mainnet);
+// export const L2PublicClient = createL2PublicClient(scroll);
+
+const { min_delay, max_delay } = TRANSACTION_PARAMETERS;
 
 const main = async () => {
   // Acquire wallets
-
-  getWallets();
-
-  getL2Wallets();
+  getShuffledWallets();
 
   for (let i = 0; i < accounts.length; i++) {
-    walletBalance_L2_token(accounts[i], {
-      symbol: "USDT",
-      address: "0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df",
-      decimals: 8,
-    });
+    const action = randomizeIndex(1);
+
+    switch (action) {
+      case 0:
+        await swapAlgo(L2Wallets[i]);
+        break;
+      // case 1:
+      //   // do something
+      //   break;
+      // case 2:
+      //   await swapAlgo(L2Wallets[i]);
+      //   break;
+    }
+
+    const POLL_INTERVAL = randomizeTime(min_delay, max_delay);
+    console.log(
+      "Poll interval =>",
+      Math.floor(POLL_INTERVAL / (1000 * 60)),
+      "mn"
+    );
+    await new Promise((resolve, _) => setTimeout(resolve, POLL_INTERVAL));
   }
 };
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;

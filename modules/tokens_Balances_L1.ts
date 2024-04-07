@@ -1,16 +1,15 @@
 import colors from "colors";
 import { ERC20ABI } from "../ABI/ERC20ABI";
-import { getAddress, formatUnits, formatEther } from "viem";
+import { getAddress, formatUnits, formatEther, Address } from "viem";
 import { mainnet } from "viem/chains";
-import { HDAccount } from "viem/accounts";
 
 import { createL1PublicClient } from "../helpers/load_publicClient";
 
-import { TokenDetails } from "../constants/constants";
+import { ContractDetails } from "../constants/constants";
 
 export const walletBalance_L1_token = async (
-  wallet: HDAccount,
-  tokenDetails: TokenDetails
+  address: Address,
+  tokenDetails: ContractDetails
 ) => {
   const decimals = tokenDetails.decimals;
   const symbol = tokenDetails.symbol;
@@ -22,25 +21,18 @@ export const walletBalance_L1_token = async (
       address: getAddress(tokenDetails.address),
       abi: ERC20ABI,
       functionName: "balanceOf",
-      args: [wallet.address],
+      args: [address],
     });
 
     if (decimals === 18) {
-      console.log(
-        wallet.address + " => ",
-        Number(formatEther(balance)),
-        symbol
-      );
+      return formatEther(balance);
     } else if (decimals === 6) {
-      console.log(
-        wallet.address + " => ",
-        Number(formatUnits(balance, 6)),
-        symbol
-      );
+      return formatUnits(balance, 6);
     } else {
-      console.log(colors.red("wrong decimals =>"), decimals);
+      console.log(colors.red(`wrong decimals => ${decimals}`));
+      throw new Error(`wrong decimals ${tokenDetails.symbol}  `);
     }
   } catch (error) {
-    console.log(colors.red(`getBalance ${wallet.address} error =>`), error);
+    console.log(colors.red(`getBalance ${address} error => ${error}`));
   }
 };
