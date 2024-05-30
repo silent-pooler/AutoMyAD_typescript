@@ -8,6 +8,7 @@ import {
   ZERO_ADDRESS,
   SCROLL_MAINNET_CONTRACT,
 } from "../../constants/constants";
+
 import {
   Address,
   formatEther,
@@ -22,9 +23,7 @@ import {
   //parseAbiItem,
 } from "viem";
 import { WalletClientWithPublicActions } from "../../helpers/load_walletsClient";
-import { walletBalance_L2_ETH } from "../eth_Balances_L2";
-//import { createL2PublicClient } from "../../helpers/load_publicClient";
-import { scroll } from "viem/chains";
+import { fetch_ETH_balance_L2 } from "../eth_Balances_L2";
 
 const { SYNCSWAP_CLASSIC_POOL_FACTORY, SYNCSWAP_ROUTER, WETH } =
   SCROLL_MAINNET_CONTRACT;
@@ -34,21 +33,22 @@ export const syncswap_swap_ETH_to_token = async (
   amount: string,
   token: ContractDetails
 ) => {
-  const [address]: Address[] = await walletClient.getAddresses();
-  const walletAddress: Address = address;
+  const [walletAddress]: Address[] = await walletClient.getAddresses();
   const network: string | undefined = walletClient.chain?.name;
-  const symbol: string = token.symbol!;
+  const { symbol, decimals } = token;
 
   log(colors.green(`... Swap on SyncSwap L2 ${network} start ...`));
   log("\n");
-  log(
-    colors.green(`${walletAddress} buy ${colors.yellow(amount + " " + symbol)}`)
-  );
+  log(colors.green(`${walletAddress} buy ${colors.yellow(symbol)}`));
+  log("\n");
 
-  const value: bigint = parseUnits(amount, 6);
+  const value: bigint = parseUnits(amount, decimals);
 
-  const WETH_Balance_before = await walletBalance_L2_ETH(walletAddress);
-  log("WETH_Balance_before", WETH_Balance_before);
+  const WETH_balance_before = await fetch_ETH_balance_L2(walletAddress);
+
+  WETH_balance_before !== null
+    ? log("WETH_balance_before =>", colors.yellow(`${WETH_balance_before}`))
+    : log(colors.red("Failed to fetch WETH_balance_before after 5 attempts"));
 
   const poolAddress: Address = await walletClient.readContract({
     address: SYNCSWAP_CLASSIC_POOL_FACTORY.address,
@@ -123,25 +123,41 @@ export const syncswap_swap_ETH_to_token = async (
     const hash = await walletClient.writeContract(request);
 
     const receipt = await walletClient.waitForTransactionReceipt({
-      confirmations: 1,
+      confirmations: 6,
       hash: hash,
       onReplaced: (replacement) => log("replacement =>", replacement),
     });
 
-    //log("receipt =>", receipt);
-
-    const [, amountETHSpent, amountTokenReceived] = decodeAbiParameters(
+    const [amount0In, amount1In, amount0Out, amount1Out] = decodeAbiParameters(
       parseAbiParameters(
         "uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out"
       ),
       receipt.logs[0].data
     );
 
-    log("amountETHSpent", formatEther(amountETHSpent));
-    log("amountTokenReceived", formatUnits(amountTokenReceived, 6));
+    let amountETHSpent: string;
+    let amountTokenReceived: string;
 
-    const WETH_Balance_after = await walletBalance_L2_ETH(walletAddress);
-    log("WETH_Balance_after", WETH_Balance_after);
+    if (formatEther(amount0In) === "0") {
+      amountETHSpent = formatEther(amount1In);
+      amountTokenReceived = formatUnits(amount0Out, decimals);
+    } else {
+      amountETHSpent = formatEther(amount0In);
+      amountTokenReceived = formatUnits(amount1Out, decimals);
+    }
+
+    log("\n");
+    log("amountETHSpent =>", colors.yellow(amountETHSpent));
+    log("amountTokenReceived =>", colors.yellow(amountTokenReceived));
+    log("\n");
+
+    const WETH_balance_after = await fetch_ETH_balance_L2(walletAddress);
+
+    WETH_balance_after !== null
+      ? log("WETH_balance_after =>", colors.yellow(`${WETH_balance_after}`))
+      : log(colors.red("Failed to fetch WETH_balance_after after 5 attempts"));
+
+    log("\n");
 
     /* if you want to play with event PART 2
 
@@ -165,13 +181,14 @@ export const syncswap_swap_ETH_to_token = async (
 
     */
   } catch (error) {
+    log(colors.red(`An error happen => ${error}`));
     if (error instanceof BaseError) {
       const revertError = error.walk(
         (error) => error instanceof ContractFunctionRevertedError
       );
       if (revertError instanceof ContractFunctionRevertedError) {
         const errorName = revertError.data?.errorName ?? "";
-        log("errorName =>", errorName);
+        log(colors.red(`errorName => ${errorName}`));
       }
     }
   }

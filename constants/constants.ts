@@ -33,14 +33,17 @@ enum SwapableTokenNames {
   WETH = "WETH",
 }
 
-export interface ContractDetails {
+export interface ContractAddress {
   address: Address;
-  symbol?: string;
-  decimals?: number;
+}
+
+export interface ContractDetails extends ContractAddress {
+  symbol: string;
+  decimals: number;
 }
 
 type ScrollMainnetContracts = {
-  [key in ScrollMainnetContractNames]: ContractDetails;
+  [key in ScrollMainnetContractNames]: ContractAddress | ContractDetails;
 };
 
 type MainnetContracts = {
@@ -108,8 +111,8 @@ export interface TransactionParameters {
 }
 
 export const TRANSACTION_PARAMETERS: TransactionParameters = {
-  min_delay: 1800, // in s = 30 mn
-  max_delay: 14400, // in s = 4 h
+  min_delay: 14400, // in s = 4h
+  max_delay: 21600, // in s = 6h
   min_amount_stable: 2,
   max_amount_stable: 12,
 };
