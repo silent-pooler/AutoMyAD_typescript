@@ -111,8 +111,8 @@ export interface TransactionParameters {
 }
 
 export const TRANSACTION_PARAMETERS: TransactionParameters = {
-  min_delay: 1800, // in s = 30 mn
-  max_delay: 14400, // in s = 4 h
+  min_delay: 14400, // in s = 4h
+  max_delay: 21600, // in s = 6h
   min_amount_stable: 2,
   max_amount_stable: 12,
 };

@@ -136,8 +136,6 @@ export const syncswap_swap_token_to_ETH = async (
         ? receipt.logs[1].data
         : undefined;
 
-    console.log("receiptToCheck =>", receiptToCheck);
-
     if (receiptToCheck === undefined) {
       log(colors.red(`receiptToCheck => ${receiptToCheck}`));
       throw Error("receiptToCheck is undefined");
