@@ -37,3 +37,13 @@ export function randomizeIndex(length: number): number {
   let index = Math.floor(Math.random() * length);
   return index;
 }
+
+export function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function exponentialDelay(ms: number, attempt: number): Promise<void> {
+  return new Promise((resolve) =>
+    setTimeout(resolve, ms * Math.pow(2, attempt))
+  );
+}

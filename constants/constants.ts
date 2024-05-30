@@ -33,14 +33,17 @@ enum SwapableTokenNames {
   WETH = "WETH",
 }
 
-export interface ContractDetails {
+export interface ContractAddress {
   address: Address;
-  symbol?: string;
-  decimals?: number;
+}
+
+export interface ContractDetails extends ContractAddress {
+  symbol: string;
+  decimals: number;
 }
 
 type ScrollMainnetContracts = {
-  [key in ScrollMainnetContractNames]: ContractDetails;
+  [key in ScrollMainnetContractNames]: ContractAddress | ContractDetails;
 };
 
 type MainnetContracts = {

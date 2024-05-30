@@ -93,7 +93,7 @@ async function cli(): Promise<void> {
       tokenList = MAINNET_CONTRACT;
       break;
     case "scroll":
-      tokenList = SCROLL_MAINNET_CONTRACT;
+      tokenList = SCROLL_MAINNET_CONTRACT as SwapableNetworkContracts;
       break;
     default:
       console.log(colors.red("Invalid network must be 'mainnet' or 'scroll'"));
