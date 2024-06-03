@@ -1,3 +1,4 @@
+import colors from "colors";
 import { log } from "console";
 import { Address } from "viem";
 import {
@@ -36,12 +37,14 @@ export const swapAlgo = async (wallet: WalletClientWithPublicActions) => {
     // Buy USDC
     case 0:
       tokenBalance = await fetch_token_balance_L2(walletAddress, USDC);
-      log("amountToken =>", tokenBalance);
+      log("amountToken =>", colors.yellow(`${tokenBalance}`));
+      log("\n");
 
       if (tokenBalance === null) {
         break;
-      } else if (tokenBalance >= "12") {
-        log("token balance > 12");
+      } else if (Number(tokenBalance) >= 12) {
+        log("token balance > 12 =>", Number(tokenBalance));
+        log("\n");
         await syncswap_swap_token_to_ETH(wallet, tokenBalance, USDC);
         break;
       }
@@ -56,12 +59,14 @@ export const swapAlgo = async (wallet: WalletClientWithPublicActions) => {
     // Buy USDT
     case 1:
       tokenBalance = await fetch_token_balance_L2(walletAddress, USDT);
-      log("amountToken =>", tokenBalance);
+      log("amountToken =>", colors.yellow(`${tokenBalance}`));
+      log("\n");
 
       if (tokenBalance === null) {
         break;
-      } else if (tokenBalance >= "12") {
-        log("token balance > 12");
+      } else if (Number(tokenBalance) >= 12) {
+        log("token balance > 12 =>", Number(tokenBalance));
+        log("\n");
         await syncswap_swap_token_to_ETH(wallet, tokenBalance, USDT);
         break;
       }

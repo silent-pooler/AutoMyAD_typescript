@@ -1,4 +1,5 @@
 import * as envEnc from "@chainlink/env-enc";
+import colors from "colors";
 import { log } from "console";
 import * as dotenv from "dotenv";
 envEnc.config();
@@ -15,13 +16,6 @@ import {
 
 import { swapAlgo } from "./modules/algo/swapAlgo";
 
-///
-
-///
-
-// export const L1PublicClient = createL1PublicClient(mainnet);
-// export const L2PublicClient = createL2PublicClient(scroll);
-
 const { min_delay, max_delay } = TRANSACTION_PARAMETERS;
 
 const main = async () => {
@@ -29,18 +23,26 @@ const main = async () => {
   getShuffledWallets();
 
   for (let i = 0; i < accounts.length; i++) {
+    const [walletAddress] = await L2Wallets[i].getAddresses();
+
+    log("\n");
+    log(colors.green(`${i + 1} - ${walletAddress}`));
+    log("\n");
+
     const action = randomizeIndex(1);
 
     switch (action) {
       case 0:
         await swapAlgo(L2Wallets[i]);
         break;
-      // case 1:
-      //   // do something
-      //   break;
-      // case 2:
-      //   await swapAlgo(L2Wallets[i]);
-      //   break;
+      /*
+      case 1:
+        // do something, wrap / unwrap ETH for example
+        break;
+      case 2:
+        // do something, add / remove liquidity for example
+        break;
+      */
     }
 
     const POLL_INTERVAL = randomizeTime(min_delay, max_delay);
