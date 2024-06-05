@@ -1,26 +1,25 @@
-import { log } from "console";
 import colors from "colors";
-import { SyncSwapClassicPoolFactoryABI } from "../../ABI/SyncSwapClassicPoolFactoryABI.";
+import { log } from "console";
+import { SyncSwapClassicPoolFactoryABI } from "../../ABI/SyncSwapClassicPoolFactoryABI";
 import { SyncSwapPoolABI } from "../../ABI/SyncSwapPoolABI";
 import { SyncSwapRouterABI } from "../../ABI/SyncSwapRouterABI";
 import {
   ContractDetails,
-  ZERO_ADDRESS,
   SCROLL_MAINNET_CONTRACT,
+  ZERO_ADDRESS,
 } from "../../constants/constants";
 
 import {
   Address,
-  formatEther,
-  formatUnits,
-  parseUnits,
-  encodeAbiParameters,
-  parseAbiParameters,
   BaseError,
   ContractFunctionRevertedError,
   //decodeEventLog,
   decodeAbiParameters,
-  //parseAbiItem,
+  encodeAbiParameters,
+  formatEther,
+  formatUnits,
+  parseAbiParameters,
+  parseUnits,
 } from "viem";
 import { WalletClientWithPublicActions } from "../../helpers/load_walletsClient";
 import { fetch_ETH_balance_L2 } from "../eth_Balances_L2";

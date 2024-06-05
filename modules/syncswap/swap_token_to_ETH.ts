@@ -1,7 +1,7 @@
 import colors from "colors";
 import { log } from "console";
 import { ERC20ABI } from "../../ABI/ERC20ABI";
-import { SyncSwapClassicPoolFactoryABI } from "../../ABI/SyncSwapClassicPoolFactoryABI.";
+import { SyncSwapClassicPoolFactoryABI } from "../../ABI/SyncSwapClassicPoolFactoryABI";
 import { SyncSwapPoolABI } from "../../ABI/SyncSwapPoolABI";
 import { SyncSwapRouterABI } from "../../ABI/SyncSwapRouterABI";
 import {
@@ -38,7 +38,7 @@ export const syncswap_swap_token_to_ETH = async (
 
   log(colors.green(`... Swap on SyncSwap L2 ${network} start ...`));
   log("\n");
-  log(colors.green(`${walletAddress} sell ${colors.yellow(symbol)}`));
+  log(colors.yellow(`${walletAddress} sell ${amount} ${symbol}`));
   log("\n");
 
   const tokenAmountIn: bigint = parseUnits(amount, decimals);

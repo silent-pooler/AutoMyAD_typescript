@@ -3,15 +3,16 @@ envEnc.config();
 // import * as dotenv from "dotenv";
 // dotenv.config();
 
-import { mnemonicToAccount, HDAccount } from "viem/accounts";
-import { mainnet, scroll } from "viem/chains";
 import {
-  http,
-  createWalletClient,
-  WalletClient,
-  publicActions,
   PublicActions,
+  WalletClient,
+  createWalletClient,
+  fallback,
+  http,
+  publicActions,
 } from "viem";
+import { HDAccount, mnemonicToAccount } from "viem/accounts";
+import { mainnet, scroll } from "viem/chains";
 
 import { shuffleWallets } from "./functions";
 
@@ -53,7 +54,15 @@ export const getL2Wallets = () => {
     L2Wallets[i] = createWalletClient({
       account: accounts[i],
       chain: scroll,
-      transport: http(process.env.SCROLL_MAINNET_RPC_URL),
+      transport: fallback(
+        [
+          http(process.env.SCROLL_MAINNET_RPC_URL),
+          http("https://scroll.drpc.org"),
+          http("https://1rpc.io/scroll"),
+          http("https://rpc.scroll.io/"),
+        ],
+        { rank: true }
+      ),
     }).extend(publicActions);
   }
 };
