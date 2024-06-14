@@ -45,10 +45,6 @@ export const syncswap_swap_ETH_to_token = async (
 
   const WETH_balance_before = await fetch_ETH_balance_L2(walletAddress);
 
-  WETH_balance_before !== null
-    ? log("WETH_balance_before =>", colors.yellow(`${WETH_balance_before}`))
-    : log(colors.red("Failed to fetch WETH_balance_before after 5 attempts"));
-
   const poolAddress: Address = await walletClient.readContract({
     address: SYNCSWAP_CLASSIC_POOL_FACTORY.address,
     abi: SyncSwapClassicPoolFactoryABI,
@@ -106,7 +102,8 @@ export const syncswap_swap_ETH_to_token = async (
     const block = await walletClient.getBlockNumber();
 
     */
-
+    log(colors.yellow("Swapping ..."));
+    log("\n");
     const { request } = await walletClient.simulateContract({
       address: SYNCSWAP_ROUTER.address,
       abi: SyncSwapRouterABI,
@@ -145,15 +142,20 @@ export const syncswap_swap_ETH_to_token = async (
       amountTokenReceived = formatUnits(amount1Out, decimals);
     }
 
+    WETH_balance_before !== null
+      ? log("ETH before =>", colors.yellow(`${WETH_balance_before}`))
+      : log(colors.red("Failed to fetch WETH_balance_before after 5 attempts"));
     log("\n");
-    log("amountETHSpent =>", colors.yellow(amountETHSpent));
-    log("amountTokenReceived =>", colors.yellow(amountTokenReceived));
+
+    log("Amount ETH spent =>", colors.yellow(amountETHSpent));
+    log("\n");
+    log("Amount token received =>", colors.yellow(amountTokenReceived));
     log("\n");
 
     const WETH_balance_after = await fetch_ETH_balance_L2(walletAddress);
 
     WETH_balance_after !== null
-      ? log("WETH_balance_after =>", colors.yellow(`${WETH_balance_after}`))
+      ? log("ETH after =>", colors.yellow(`${WETH_balance_after}`))
       : log(colors.red("Failed to fetch WETH_balance_after after 5 attempts"));
 
     log("\n");
@@ -180,7 +182,8 @@ export const syncswap_swap_ETH_to_token = async (
 
     */
   } catch (error) {
-    log(colors.red(`An error happen => ${error}`));
+    log(colors.red("An error happened in swap function"));
+    log("\n");
     if (error instanceof BaseError) {
       const revertError = error.walk(
         (error) => error instanceof ContractFunctionRevertedError
@@ -188,6 +191,7 @@ export const syncswap_swap_ETH_to_token = async (
       if (revertError instanceof ContractFunctionRevertedError) {
         const errorName = revertError.data?.errorName ?? "";
         log(colors.red(`errorName => ${errorName}`));
+        log("\n");
       }
     }
   }

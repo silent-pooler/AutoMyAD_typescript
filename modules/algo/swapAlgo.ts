@@ -1,4 +1,3 @@
-import colors from "colors";
 import { log } from "console";
 import { Address } from "viem";
 import {
@@ -37,8 +36,6 @@ export const swapAlgo = async (wallet: WalletClientWithPublicActions) => {
     // Buy USDC
     case 0:
       tokenBalance = await fetch_token_balance_L2(walletAddress, USDC);
-      log("amountToken =>", colors.yellow(`${tokenBalance}`));
-      log("\n");
 
       if (tokenBalance === null) {
         break;
@@ -59,8 +56,6 @@ export const swapAlgo = async (wallet: WalletClientWithPublicActions) => {
     // Buy USDT
     case 1:
       tokenBalance = await fetch_token_balance_L2(walletAddress, USDT);
-      log("amountToken =>", colors.yellow(`${tokenBalance}`));
-      log("\n");
 
       if (tokenBalance === null) {
         break;

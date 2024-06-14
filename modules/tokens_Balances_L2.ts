@@ -1,11 +1,9 @@
-import { log } from "console";
-import colors from "colors";
-import { ERC20ABI } from "../ABI/ERC20ABI";
-import { getAddress, formatUnits, formatEther, Address } from "viem";
+import { Address, formatUnits, getAddress } from "viem";
 import { scroll } from "viem/chains";
+import { ERC20ABI } from "../ABI/ERC20ABI";
 
-import { createL2PublicClient } from "../helpers/load_publicClient";
 import { exponentialDelay } from "../helpers/functions";
+import { createL2PublicClient } from "../helpers/load_publicClient";
 
 import { ContractDetails } from "../constants/constants";
 
@@ -25,10 +23,7 @@ export const walletBalance_L2_token = async (
       args: [walletAddress],
     });
     return formatUnits(balance, decimals);
-  } catch (error) {
-    console.log(
-      colors.red(`getBalance ${address} error => ${error} for token ${symbol}`)
-    );
+  } catch {
     return null;
   }
 };

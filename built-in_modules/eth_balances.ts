@@ -3,11 +3,11 @@ import { formatEther } from "viem";
 
 import { mainnet, scroll } from "viem/chains";
 
-import { getAccounts, accounts } from "../helpers/load_walletsClient";
+import { accounts, getAccounts } from "../helpers/load_walletsClient";
 
 import {
-  createL2PublicClient,
   createL1PublicClient,
+  createL2PublicClient,
 } from "../helpers/load_publicClient";
 
 import { Network } from "../constants/constants";
@@ -68,7 +68,11 @@ async function cli(): Promise<void> {
   }
 }
 
-cli().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+cli()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

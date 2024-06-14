@@ -43,9 +43,9 @@ export const syncswap_swap_token_to_ETH = async (token: ContractDetails) => {
   for (let i = 0; i < accounts.length; i++) {
     const [walletAddress]: Address[] = await L2Wallets[i].getAddresses();
     const { symbol, decimals } = token;
+
     const amount = await fetch_token_balance_L2(walletAddress, token);
 
-    log("\n");
     log(colors.green(`${i + 1} - ${walletAddress}`));
     log("\n");
 
@@ -62,10 +62,6 @@ export const syncswap_swap_token_to_ETH = async (token: ContractDetails) => {
 
     const tokenAmountIn: bigint = parseUnits(amount, decimals);
     const WETH_balance_before = await fetch_ETH_balance_L2(walletAddress);
-
-    WETH_balance_before !== null
-      ? log("WETH_balance_before =>", colors.yellow(`${WETH_balance_before}`))
-      : log(colors.red("Failed to fetch WETH_balance_before after 5 attempts"));
 
     const poolAddress: Address = await L2Wallets[i].readContract({
       address: SYNCSWAP_CLASSIC_POOL_FACTORY.address,
@@ -111,94 +107,27 @@ export const syncswap_swap_token_to_ETH = async (token: ContractDetails) => {
       },
     ];
 
+    let isApproved = false;
     try {
-      {
-        const { request } = await L2Wallets[i].simulateContract({
-          address: token.address,
-          abi: ERC20ABI,
-          functionName: "approve",
-          args: [SYNCSWAP_ROUTER.address, tokenAmountIn],
-        });
-
-        const hash = await L2Wallets[i].writeContract(request);
-
-        await L2Wallets[i].waitForTransactionReceipt({
-          hash: hash,
-          onReplaced: (replacement) => log("replacement =>", replacement),
-        });
-      }
+      log(colors.yellow("Approving ..."));
+      log("\n");
       const { request } = await L2Wallets[i].simulateContract({
-        address: SYNCSWAP_ROUTER.address,
-        abi: SyncSwapRouterABI,
-        functionName: "swap",
-        args: [
-          paths,
-          minAmountOut,
-          BigInt(Math.floor(Date.now() / 1000)) + BigInt(60),
-        ],
+        address: token.address,
+        abi: ERC20ABI,
+        functionName: "approve",
+        args: [SYNCSWAP_ROUTER.address, tokenAmountIn],
       });
 
       const hash = await L2Wallets[i].writeContract(request);
 
-      const receipt = await L2Wallets[i].waitForTransactionReceipt({
-        confirmations: 6,
+      await L2Wallets[i].waitForTransactionReceipt({
         hash: hash,
         onReplaced: (replacement) => log("replacement =>", replacement),
       });
 
-      const receiptToCheck =
-        symbol === "USDT"
-          ? receipt.logs[2].data
-          : symbol === "USDC"
-          ? receipt.logs[1].data
-          : undefined;
-
-      if (receiptToCheck === undefined) {
-        log(colors.red(`receiptToCheck => ${receiptToCheck}`));
-        throw Error("receiptToCheck is undefined");
-      }
-
-      const [amount0In, amount1In, amount0Out, amount1Out] =
-        decodeAbiParameters(
-          parseAbiParameters(
-            "uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out"
-          ),
-          receiptToCheck
-        );
-
-      let amountTokenSpent: string;
-      let amountETHReceived: string;
-
-      if (formatUnits(amount0In, decimals) === "0") {
-        amountTokenSpent = formatUnits(amount1In, decimals);
-        amountETHReceived = formatEther(amount0Out);
-      } else {
-        amountTokenSpent = formatUnits(amount0In, decimals);
-        amountETHReceived = formatEther(amount1Out);
-      }
-
-      log("\n");
-      log("amountTokenSpent =>", colors.yellow(amountTokenSpent));
-      log("amountETHReceived =>", colors.yellow(amountETHReceived));
-      log("\n");
-
-      const WETH_balance_after = await fetch_ETH_balance_L2(walletAddress);
-
-      WETH_balance_after !== null
-        ? log("WETH_balance_after =>", colors.yellow(`${WETH_balance_after}`))
-        : log(
-            colors.red("Failed to fetch WETH_balance_after after 5 attempts")
-          );
-
-      log("\n");
-
-      const POLL_INTERVAL = randomizeTime(min_delay, max_delay);
-      log("Poll interval =>", Math.floor(POLL_INTERVAL / (1000 * 60)), "mn");
-      log("\n");
-
-      await delay(POLL_INTERVAL);
+      isApproved = true;
     } catch (error) {
-      log(colors.red(`An error happen => ${error}`));
+      log(colors.red(`An error happened in approve function`));
       if (error instanceof BaseError) {
         const revertError = error.walk(
           (error) => error instanceof ContractFunctionRevertedError
@@ -209,12 +138,107 @@ export const syncswap_swap_token_to_ETH = async (token: ContractDetails) => {
         }
       }
     }
+
+    if (isApproved) {
+      try {
+        log(colors.yellow("Swapping ..."));
+        log("\n");
+        const { request } = await L2Wallets[i].simulateContract({
+          address: SYNCSWAP_ROUTER.address,
+          abi: SyncSwapRouterABI,
+          functionName: "swap",
+          args: [
+            paths,
+            minAmountOut,
+            BigInt(Math.floor(Date.now() / 1000)) + BigInt(60),
+          ],
+        });
+
+        const hash = await L2Wallets[i].writeContract(request);
+
+        const receipt = await L2Wallets[i].waitForTransactionReceipt({
+          confirmations: 6,
+          hash: hash,
+          onReplaced: (replacement) => log("replacement =>", replacement),
+        });
+
+        const receiptToCheck =
+          symbol === "USDT"
+            ? receipt.logs[2].data
+            : symbol === "USDC"
+            ? receipt.logs[1].data
+            : undefined;
+
+        if (receiptToCheck === undefined) {
+          log(colors.red(`receiptToCheck => ${receiptToCheck}`));
+          throw Error("receiptToCheck is undefined");
+        }
+
+        const [amount0In, amount1In, amount0Out, amount1Out] =
+          decodeAbiParameters(
+            parseAbiParameters(
+              "uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out"
+            ),
+            receiptToCheck
+          );
+
+        let amountTokenSpent: string;
+        let amountETHReceived: string;
+
+        if (formatUnits(amount0In, decimals) === "0") {
+          amountTokenSpent = formatUnits(amount1In, decimals);
+          amountETHReceived = formatEther(amount0Out);
+        } else {
+          amountTokenSpent = formatUnits(amount0In, decimals);
+          amountETHReceived = formatEther(amount1Out);
+        }
+
+        WETH_balance_before !== null
+          ? log("ETH before =>", colors.yellow(`${WETH_balance_before}`))
+          : log(
+              colors.red("Failed to fetch WETH_balance_before after 5 attempts")
+            );
+        log("\n");
+
+        log("Amount token spent =>", colors.yellow(amountTokenSpent));
+        log("\n");
+        log("Amount ETH received =>", colors.yellow(amountETHReceived));
+        log("\n");
+
+        const WETH_balance_after = await fetch_ETH_balance_L2(walletAddress);
+
+        WETH_balance_after !== null
+          ? log("ETH after =>", colors.yellow(`${WETH_balance_after}`))
+          : log(
+              colors.red("Failed to fetch WETH_balance_after after 5 attempts")
+            );
+        log("\n");
+      } catch (error) {
+        log(colors.red(`An error happened in swap function`));
+        log("\n");
+        if (error instanceof BaseError) {
+          const revertError = error.walk(
+            (error) => error instanceof ContractFunctionRevertedError
+          );
+          if (revertError instanceof ContractFunctionRevertedError) {
+            const errorName = revertError.data?.errorName ?? "";
+            log(colors.red(`errorName => ${errorName}`));
+            log("\n");
+          }
+        }
+      }
+    }
+    const POLL_INTERVAL = randomizeTime(min_delay, max_delay);
+    log("Poll interval =>", Math.floor(POLL_INTERVAL / (1000 * 60)), "mn");
+    log("\n");
+
+    await delay(POLL_INTERVAL);
   }
 };
 
-async function cli(): Promise<void> {
+const cli = async (): Promise<void> => {
   if (process.argv[2] === "--help") {
-    console.log(
+    log(
       "SYMBOL       swap SYMBOL balance on scroll network on every wallets in a random way"
     );
     return;
@@ -222,7 +246,7 @@ async function cli(): Promise<void> {
   const args = process.argv.slice(2);
 
   if (args.length != 1) {
-    console.log(colors.red("Please provide one argument as token symbol"));
+    log(colors.red("Please provide one argument as token symbol"));
   }
   const symbol = args[0];
 
@@ -236,14 +260,20 @@ async function cli(): Promise<void> {
       ContractDetails = tokenList.USDC;
       break;
     default:
-      console.log(colors.red("Invalid token research"));
+      log(colors.red("Invalid token research"));
       throw new Error("Invalid token");
   }
 
-  syncswap_swap_token_to_ETH(ContractDetails);
-}
+  await syncswap_swap_token_to_ETH(ContractDetails);
+};
 
-cli().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+cli()
+  .then(() => {
+    console.log("exit(0)");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.log("exit(1)");
+    console.error(error);
+    process.exit(1);
+  });

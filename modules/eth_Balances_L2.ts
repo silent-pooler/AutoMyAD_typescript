@@ -1,10 +1,8 @@
-import { log } from "console";
-import colors from "colors";
 import { Address, formatEther } from "viem";
 import { scroll } from "viem/chains";
 
-import { createL2PublicClient } from "../helpers/load_publicClient";
 import { exponentialDelay } from "../helpers/functions";
+import { createL2PublicClient } from "../helpers/load_publicClient";
 
 export const walletBalance_L2_ETH = async (
   walletAddress: Address
@@ -16,8 +14,7 @@ export const walletBalance_L2_ETH = async (
       address: walletAddress,
     });
     return formatEther(balance);
-  } catch (error) {
-    log(colors.red(`getBalance ${walletAddress} error => ${error}`));
+  } catch {
     return null;
   }
 };
@@ -39,5 +36,6 @@ export const fetch_ETH_balance_L2 = async (
       await exponentialDelay(1000, attempts);
     }
   }
+
   return ETH_balance;
 };
