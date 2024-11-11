@@ -106,4 +106,4 @@ No license, every contribution appreciated, It's you and I against the VC!
 
 ## Authors
 
-- **silent-pooler** - _Creator_ - [mo7tr](https://github.com/silent-pooler)
+- **silent-pooler** - _Creator_ - [silent pooler](https://github.com/silent-pooler)
